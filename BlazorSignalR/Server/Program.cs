@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.ResponseCompression;
 using BlazorWebAssemblySignalRApp.Server.Hubs;
+using BlazorSignalR.Server.Hubs;
 
 namespace BlazorSignalR
 {
@@ -11,18 +12,30 @@ namespace BlazorSignalR
 
             // Add services to the container.
 
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddRazorPages();
+            ConfigureServices(builder.Services);
 
-            builder.Services.AddSignalR();
-            builder.Services.AddResponseCompression(opts =>
+            var app = builder.Build();
+
+            Configure(app);
+
+            app.Run();
+        }
+
+        public static void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+            
+            services.AddSignalR();
+            services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                    new[] { "application/octet-stream" });
             });
+        }
 
-            var app = builder.Build();
-
+        public static void Configure(WebApplication app)
+        {
             app.UseResponseCompression();
 
             // Configure the HTTP request pipeline.
@@ -44,13 +57,11 @@ namespace BlazorSignalR
 
             app.UseRouting();
 
-
             app.MapRazorPages();
             app.MapControllers();
             app.MapHub<ChatHub>("/chathub");
+            app.MapHub<TestHub>("/testHub");
             app.MapFallbackToFile("index.html");
-
-            app.Run();
         }
     }
 }
