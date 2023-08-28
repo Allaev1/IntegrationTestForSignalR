@@ -19,22 +19,24 @@ namespace TestSignalR
         [Fact]
         public async Task ShouldNotifySubscribers()
         {
-            _factory.CreateClient();
-            var mockHandler = new Mock<Action<string, string>>();
+            _factory.CreateClient(); // You need to call this procedure in order to create server
+            var mockHandler = new Mock<Action<string, string>>(); 
 
             // Arrange
 
             var connection = await StartConnectionAsync(_factory.Server.CreateHandler(), SignalRConstants.ChatHubRouteName);
-            //TODO: instead of literal with handler name use constant
+            //Register handler with some name, message will be sent from server to the handler with this name
             connection.On(SignalRConstants.SendMessageHandlerName, mockHandler.Object);
 
             var sourceUserName = "super_user";
             var sourceMessage = "Hello World!!";
 
             // Act
+            // Send message to the ChatHub(to the server), to the SendMessage method(method with such name exist in ChatHub)
             await connection.InvokeAsync(nameof(ChatHub.SendMessage), sourceUserName, sourceMessage);
 
             // Assert
+            // Make sure that handler was called once and that handler have recieved correct input values
             mockHandler.Verify(x => x(It.Is<string>(userName => userName == sourceUserName), It.Is<string>(message => message == sourceMessage)), Times.Once);
         }
 
