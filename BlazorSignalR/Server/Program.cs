@@ -1,67 +1,55 @@
 using Microsoft.AspNetCore.ResponseCompression;
 using BlazorWebAssemblySignalRApp.Server.Hubs;
-using BlazorSignalR.Server.Hubs;
+using BlazorSignalR.Shared;
 
-namespace BlazorSignalR
+namespace BlazorSignalR;
+
+public class Program
 {
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+
+        // Add services to the container.
+
+        builder.Services.AddControllersWithViews();
+        builder.Services.AddRazorPages();
+
+        builder.Services.AddSignalR();
+        builder.Services.AddResponseCompression(opts =>
         {
-            var builder = WebApplication.CreateBuilder(args);
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+               new[] { "application/octet-stream" });
+        });
 
-            // Add services to the container.
+        var app = builder.Build();
 
-            ConfigureServices(builder.Services);
+        app.UseResponseCompression();
 
-            var app = builder.Build();
-
-            Configure(app);
-
-            app.Run();
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseWebAssemblyDebugging();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
         }
 
-        public static void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllersWithViews();
-            services.AddRazorPages();
-            
-            services.AddSignalR();
-            services.AddResponseCompression(opts =>
-            {
-                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                   new[] { "application/octet-stream" });
-            });
-        }
+        app.UseHttpsRedirection();
 
-        public static void Configure(WebApplication app)
-        {
-            app.UseResponseCompression();
+        app.UseBlazorFrameworkFiles();
+        app.UseStaticFiles();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseWebAssemblyDebugging();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+        app.UseRouting();
 
-            app.UseHttpsRedirection();
+        app.MapRazorPages();
+        app.MapControllers();
+        app.MapHub<ChatHub>($"/{SignalRConstants.ChatHubRouteName}");
+        app.MapFallbackToFile("index.html");
 
-            app.UseBlazorFrameworkFiles();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.MapRazorPages();
-            app.MapControllers();
-            app.MapHub<ChatHub>("/chathub");
-            app.MapHub<TestHub>("/testHub");
-            app.MapFallbackToFile("index.html");
-        }
+        await app.RunAsync();
     }
 }
