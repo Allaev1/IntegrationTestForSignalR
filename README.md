@@ -1,7 +1,7 @@
 # IntegrationTestForSignalR
 Tutorial on how to write integration test for SignalR hub. Client is Blazor
 
-## Instructions
+## Instructions for integration test
 
 1. Complete this tutorial - https://learn.microsoft.com/en-us/aspnet/core/blazor/tutorials/signalr-blazor?view=aspnetcore-7.0&tabs=visual-studio&pivots=webassembly
 
@@ -92,3 +92,17 @@ public async Task ShouldNotifySubscribers()
     mockHandler.Verify(x => x(It.Is<string>(userName => userName == sourceUserName), It.Is<string>(message => message == sourceMessage)), Times.Once);
 }
 ```
+
+## Instructions for IIS test
+
+***Idea of this part of article is that by following these steps you can publicate you Blazor server app with 
+SignlaR on IIS so you can open two instance of your application on two different device in your local network and thuse immitate work of SignalR in internet***
+
+> This part of documentation is based on [How to publicate Blazor server app to IIS](https://docs.devexpress.com/eXpressAppFramework/404613/deployment/asp-net-core-blazor/deploy-a-blazor-application-to-iis)
+
+1. Download ASP .NET Core Runtime for IIS [here](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-8.0.1-windows-hosting-bundle-installer)
+2. Create IIS by following instructions in this [link](https://docs.devexpress.com/eXpressAppFramework/404613/deployment/asp-net-core-blazor/deploy-a-blazor-application-to-iis#create-an-iis-site)
+3. Publish application by following instructions in this [link](https://docs.devexpress.com/eXpressAppFramework/404613/deployment/asp-net-core-blazor/deploy-a-blazor-application-to-iis#publish-the-application)
+4. Run published application by following instructions in this [link](https://docs.devexpress.com/eXpressAppFramework/404613/deployment/asp-net-core-blazor/deploy-a-blazor-application-to-iis#run-the-published-application)
+5. You can open port(port on which you deployed your app in IIS) on your machine so you can access your Blazor app from another device by following instructions in this [link](https://stackoverflow.com/a/66236487/10304482)
+6. Now you can open your Blazor application from different device
